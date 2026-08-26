@@ -3,7 +3,8 @@ from django.shortcuts import render
 
 def index(request):
     """Контроллер для отображения домашней страницы."""
-    return render(request, "catalog/home.html")
+    context = {"success": False}
+    return render(request, "catalog/home.html", context)
 
 
 def contacts(request):
