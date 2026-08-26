@@ -1,6 +1,9 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 
 
 def index(request):
-    return HttpResponse("Привет, мир! Это главная страница каталога.")
+    return render(request, 'catalog/home.html')
+
+
+def contacts(request):
+    return render(request, 'catalog/contacts.html')
