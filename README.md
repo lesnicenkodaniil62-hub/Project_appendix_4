@@ -51,7 +51,9 @@ poetry add --group dev pytest-cov
 14. django-stubs
 poetry add --group lint django-stubs
 15. django-stubs-ext
-poetry add --group lint django-stubs-ext    
+poetry add --group lint django-stubs-ext 
+16. python-dotenv
+poetry add --group lint python-dotenv   
 
 ```
 Более подробные настройки линтеров можно узнать тут, а также тесты, которые прошли функции можно узнать тут же [документации](docs/README.md).
