@@ -46,7 +46,12 @@ poetry add django
 poetry add --group dev pytest
 Code coverage в
 Code coverage в библиотеку pytest
+13. pytest-cov
 poetry add --group dev pytest-cov
+14. django-stubs
+poetry add --group lint django-stubs
+15. django-stubs-ext
+poetry add --group lint django-stubs-ext    
 
 ```
 Более подробные настройки линтеров можно узнать тут, а также тесты, которые прошли функции можно узнать тут же [документации](docs/README.md).
