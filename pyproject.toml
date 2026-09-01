@@ -69,5 +69,6 @@ lint = [
 dev = [
     "pytest (>=9.1.1,<10.0.0)",
     "pytest-cov (>=7.1.0,<8.0.0)",
-    "python-dotenv (>=1.2.3,<2.0.0)"
+    "python-dotenv (>=1.2.3,<2.0.0)",
+    "ipython (>=9.17.1,<10.0.0)"
 ]

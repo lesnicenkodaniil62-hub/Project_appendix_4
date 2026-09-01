@@ -35,6 +35,7 @@ os — для взаимодействия с операционной сист�
 json — для парсинга, чтения и сериализации данных в формате JSON.
 logging — для настройки, форматирования и вывода логов приложения.
 unittest.mock — встроенный модуль для мокирования объектов (используются Mock и patch при написании тестов).
+IPython — это улучшенная интерактивная оболочка для Python,
 
 1. flake8 
 poetry add --group lint flake8
@@ -72,6 +73,8 @@ poetry add --group lint django-stubs-ext
 poetry add --group lint python-dotenv   
 17. pillow
 poetry add --group lint pillow
+18. ipython
+poetry add --group dev ipython
 
 ```
 Более подробные настройки линтеров можно узнать тут, а также тесты, которые прошли функции можно узнать тут же [документации](docs/README.md).
