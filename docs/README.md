@@ -55,6 +55,8 @@ line_length = 119
 disallow_untyped_defs = true
 warn_return_any = true
 ignore_missing_imports = true
+[tool.django-stubs]
+django_settings_module = "config.settings"
 exclude = "venv"
 
 ```
