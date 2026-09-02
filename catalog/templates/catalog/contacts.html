@@ -29,20 +29,28 @@
     <div class="container mt-4">
         <h1 class="mb-4">Контакты</h1>
 
-        <table class="table table-bordered">
-            <tr>
-                <th>Страна</th>
-                <td>USA</td>
-            </tr>
-            <tr>
-                <th>ИНН</th>
-                <td>91-1144442</td>
-            </tr>
-            <tr>
-                <th>Адрес</th>
-                <td>Redmond, WA, 98052-6399</td>
-            </tr>
-        </table>
+        {% if contacts_list %}
+            {% for contact in contacts_list %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ contact.name }}</h5>
+                    {% if contact.email %}
+                    <p class="card-text"><strong>Email:</strong> {{ contact.email }}</p>
+                    {% endif %}
+                    {% if contact.phone %}
+                    <p class="card-text"><strong>Телефон:</strong> {{ contact.phone }}</p>
+                    {% endif %}
+                    {% if contact.address %}
+                    <p class="card-text"><strong>Адрес:</strong> {{ contact.address }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Контактные данные пока не добавлены.
+            </div>
+        {% endif %}
 
         <h2 class="mt-5 mb-4">Свяжитесь с нами</h2>
 
