@@ -7,7 +7,7 @@
 
 1. Клонируйте репозиторий:
 ```
-git clone git clone https://github.com/lesnicenkodaniil62-hub/Project_appendix_4
+git clone https://github.com/lesnicenkodaniil62-hub/Project_appendix_4
 ```
 2. Установите зависимости:
 ```
