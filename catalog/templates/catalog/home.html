@@ -12,7 +12,7 @@
             Удобный сервис с широким ассортиментом.
         </p>
         <p>Удобный сервис покупок с доставкой</p>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Перейти в каталог</a>
+        <a class="btn btn-primary btn-lg" href="{% url 'catalog:add_product' %}" role="button">Добавить товар</a>
     </div>
 </div>
 
@@ -20,9 +20,9 @@
 <h2 class="mb-4">Каталог товаров</h2>
 
 <!-- Список товаров -->
-{% if products %}
+{% if page_obj %}
 <div class="row">
-    {% for product in products %}
+    {% for product in page_obj %}
     <div class="col-md-4 mb-4">
         <div class="card h-100">
             {% if product.image %}
@@ -45,15 +45,77 @@
                 <p class="card-text fw-bold text-primary fs-5">{{ product.price }} руб.</p>
             </div>
             <div class="card-footer bg-white border-top-0">
-                <a href="/product/{{ product.pk }}/" class="btn btn-primary w-100">Подробнее</a>
+                <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary w-100">Подробнее</a>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Навигация по страницам">
+    <ul class="pagination justify-content-center">
+        <!-- Первая страница -->
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">Первая</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">← Предыдущая</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Первая</span>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">← Предыдущая</span>
+        </li>
+        {% endif %}
+
+        <!-- Номера страниц -->
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Следующая страница -->
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая →</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Следующая →</span>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Последняя</span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Информация о страницах -->
+<p class="text-center text-muted">
+    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+    (всего товаров: {{ page_obj.paginator.count }})
+</p>
+{% endif %}
+
 {% else %}
 <div class="alert alert-info" role="alert">
     Товары пока не добавлены.
+    <a href="{% url 'catalog:add_product' %}" class="alert-link">Добавить первый товар</a>
 </div>
 {% endif %}
 {% endblock %}
