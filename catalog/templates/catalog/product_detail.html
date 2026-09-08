@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - Интернет-магазин</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/home/">Интернет-магазин</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/home/">Каталог</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contacts/">Контакты</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/home/">Главная</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="row g-0">
+                <!-- Изображение товара -->
+                <div class="col-md-4">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="img-fluid rounded-start" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center h-100" style="min-height: 300px;">
+                        <p class="text-muted">Изображение отсутствует</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Информация о товаре -->
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h1 class="card-title">{{ product.name }}</h1>
+
+                        <table class="table table-borderless mt-4">
+                            <tr>
+                                <th style="width: 200px;">Категория:</th>
+                                <td>
+                                    {% if product.category %}
+                                        {{ product.category.name }}
+                                    {% else %}
+                                        <span class="text-muted">Не указана</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Цена:</th>
+                                <td>
+                                    <span class="fs-4 fw-bold text-primary">{{ product.price }} руб.</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Дата создания:</th>
+                                <td>{{ product.created_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Последнее изменение:</th>
+                                <td>{{ product.updated_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        </table>
+
+                        <hr>
+
+                        <h5>Описание:</h5>
+                        <p class="card-text">
+                            {% if product.description %}
+                                {{ product.description|linebreaks }}
+                            {% else %}
+                                <span class="text-muted">Описание отсутствует</span>
+                            {% endif %}
+                        </p>
+
+                        <div class="mt-4">
+                            <a href="/home/" class="btn btn-secondary">← Вернуться в каталог</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Интернет-магазин</h5>
+                    <p class="text-muted">© 2026</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>О нас</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/contacts/" class="text-muted">Контакты</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

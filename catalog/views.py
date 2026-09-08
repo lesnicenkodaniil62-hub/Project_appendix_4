@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render, get_object_or_404
 
-from .models import Contact, Product
+from .models import Product
 
 
-def index(request):
+def index(request: HttpRequest) -> HttpResponse:
     """Контроллер для отображения домашней страницы."""
     # Выборка последних 5 созданных продуктов
     latest_products = Product.objects.order_by("-created_at")[:5]
@@ -11,20 +12,15 @@ def index(request):
     # Вывод в консоль
     print("\n=== Последние 5 продуктов ===")
     for product in latest_products:
-        print(f"ID: {product.id} | Название: {product.name} | Цена: {product.price} | Категория: {product.category}")
+        print(f"ID: {product.id} | Название: {product.name} | Цена: {product.price}")
     print("==============================\n")
 
     return render(request, "catalog/home.html")
 
 
-def contacts(request):
+def contacts(request: HttpRequest) -> HttpResponse:
     """Контроллер для отображения страницы с контактной информацией."""
-    # Получение всех контактных данных из БД
-    contacts_list = Contact.objects.all()
-    context = {
-        "success": False,
-        "contacts_list": contacts_list,
-    }
+    context = {"success": False}
 
     if request.method == "POST":
         name = request.POST.get("name")
@@ -34,3 +30,15 @@ def contacts(request):
         context["success"] = True
 
     return render(request, "catalog/contacts.html", context)
+
+
+def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    """Контроллер для отображения подробной информации о товаре."""
+    # Получаем товар по ID или возвращаем 404
+    product = get_object_or_404(Product, pk=pk)
+
+    context = {
+        "product": product,
+    }
+
+    return render(request, "catalog/product_detail.html", context)
