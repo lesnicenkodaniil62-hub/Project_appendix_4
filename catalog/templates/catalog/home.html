@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
 </head>
 <body>
+    <!-- Навигация -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="/home/">Интернет-магазин</a>
@@ -26,27 +27,75 @@
         </div>
     </nav>
 
+    <!-- Основной контент -->
     <div class="container mt-4">
+        <!-- Баннер -->
         <div class="p-5 mb-4 bg-light rounded-3">
             <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold">Интернет-магазин</h1>
                 <p class="col-md-8 fs-4">
-                    Интернет-магазин - это отличный вариант хранения ваших плагинов и примеров кода, который вы бы хотели
-                    продать
+                    Интернет-магазин - это отличный вариант для покупки товаров онлайн.
+                    Удобный сервис с широким ассортиментом.
                 </p>
-                <p>Удобный сервис рассылок</p>
-                <p class="fs-4 fw-bold">$ 140</p>
-                <ul class="list-unstyled">
-                    <li>- Неограниченная лицензия</li>
-                    <li>- Поддержка</li>
-                    <li>- Установка на сервер</li>
-                    <li>- Получение обновлений</li>
-                </ul>
-                <a class="btn btn-primary btn-lg" href="#" role="button">Купить</a>
+                <p>Удобный сервис покупок с доставкой</p>
+                <a class="btn btn-primary btn-lg" href="#" role="button">Перейти в каталог</a>
             </div>
         </div>
+
+        <!-- Заголовок каталога -->
+        <h2 class="mb-4">Каталог товаров</h2>
+
+        <!-- Список товаров -->
+        {% if products %}
+        <div class="row">
+            {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <!-- Изображение товара -->
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <p class="text-muted mb-0">Нет изображения</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Информация о товаре -->
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+
+                        <!-- Категория -->
+                        <p class="card-text text-muted small">
+                            {% if product.category %}
+                                {{ product.category.name }}
+                            {% else %}
+                                Без категории
+                            {% endif %}
+                        </p>
+
+                        <!-- Описание (обрезано до 100 символов) -->
+                        <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+
+                        <!-- Цена -->
+                        <p class="card-text fw-bold text-primary fs-5">{{ product.price }} руб.</p>
+                    </div>
+
+                    <!-- Кнопка -->
+                    <div class="card-footer bg-white border-top-0">
+                        <a href="/product/{{ product.pk }}/" class="btn btn-primary w-100">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info" role="alert">
+            Товары пока не добавлены.
+        </div>
+        {% endif %}
     </div>
 
+    <!-- Подвал -->
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
             <div class="row">
@@ -78,6 +127,7 @@
         </div>
     </footer>
 
+    <!-- Bootstrap JS -->
     <script src="/static/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

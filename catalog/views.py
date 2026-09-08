@@ -6,7 +6,10 @@ from .models import Product
 
 def index(request: HttpRequest) -> HttpResponse:
     """Контроллер для отображения домашней страницы."""
-    # Выборка последних 5 созданных продуктов
+    # Выборка всех товаров
+    products = Product.objects.all()
+
+    # Выборка последних 5 созданных продуктов (для вывода в консоль)
     latest_products = Product.objects.order_by("-created_at")[:5]
 
     # Вывод в консоль
@@ -15,7 +18,11 @@ def index(request: HttpRequest) -> HttpResponse:
         print(f"ID: {product.id} | Название: {product.name} | Цена: {product.price}")
     print("==============================\n")
 
-    return render(request, "catalog/home.html")
+    context = {
+        "products": products,
+    }
+
+    return render(request, "catalog/home.html", context)
 
 
 def contacts(request: HttpRequest) -> HttpResponse:
@@ -34,7 +41,6 @@ def contacts(request: HttpRequest) -> HttpResponse:
 
 def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
     """Контроллер для отображения подробной информации о товаре."""
-    # Получаем товар по ID или возвращаем 404
     product = get_object_or_404(Product, pk=pk)
 
     context = {
