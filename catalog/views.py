@@ -1,72 +1,70 @@
-from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, TemplateView
 
 from .forms import ProductForm
 from .models import Product
 
 
-def index(request: HttpRequest) -> HttpResponse:
-    """Контроллер для отображения домашней страницы с пагинацией."""
-    # Выборка всех продуктов
-    products_list = Product.objects.all()
+class ProductListView(ListView):
+    """Контроллер главной страницы со списком товаров и пагинацией."""
 
-    # Пагинация: 6 товаров на страницу
-    paginator = Paginator(products_list, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    model = Product
+    template_name = "catalog/home.html"
+    context_object_name = "page_obj"
+    paginate_by = 6
 
-    # Вывод последних 5 продуктов в консоль (сохраняем из доп. задания)
-    latest_products = Product.objects.order_by("-created_at")[:5]
-    print("\n=== Последние 5 продуктов ===")
-    for product in latest_products:
-        print(f"ID: {product.id} | Название: {product.name} | Цена: {product.price}")
-    print("==============================\n")
+    def get_queryset(self):
+        """Возвращаем все товары."""
+        return Product.objects.all()
 
-    context = {
-        "page_obj": page_obj,
-    }
+    def get_context_data(self, **kwargs):
+        """Добавляем вывод последних 5 товаров в консоль."""
+        context = super().get_context_data(**kwargs)
+        latest_products = Product.objects.order_by("-created_at")[:5]
+        print("\n=== Последние 5 продуктов ===")
+        for product in latest_products:
+            print(f"ID: {product.id} | Название: {product.name} | Цена: {product.price}")
+        print("==============================\n")
+        return context
 
-    return render(request, "catalog/home.html", context)
+
+class ProductDetailView(DetailView):
+    """Контроллер детальной страницы товара."""
+
+    model = Product
+    template_name = "catalog/product_detail.html"
+    context_object_name = "product"
 
 
-def contacts(request: HttpRequest) -> HttpResponse:
-    """Контроллер для отображения страницы с контактной информацией."""
-    context = {"success": False}
+class ProductCreateView(CreateView):
+    """Контроллер добавления нового товара."""
 
-    if request.method == "POST":
+    model = Product
+    form_class = ProductForm
+    template_name = "catalog/add_product.html"
+    success_url = reverse_lazy("catalog:index")
+
+
+class ContactView(TemplateView):
+    """Контроллер страницы контактов на TemplateView."""
+
+    template_name = "catalog/contacts.html"
+
+    def get_context_data(self, **kwargs):
+        """Добавляем переменную success в контекст для GET-запросов."""
+        context = super().get_context_data(**kwargs)
+        context["success"] = False
+        return context
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Обработка POST-запроса."""
         name = request.POST.get("name")
         phone = request.POST.get("phone")
         message = request.POST.get("message")
         print(f"Получено сообщение от {name} ({phone}): {message}")
+
+        context = self.get_context_data(**kwargs)
         context["success"] = True
-
-    return render(request, "catalog/contacts.html", context)
-
-
-def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    """Контроллер для отображения подробной информации о товаре."""
-    product = get_object_or_404(Product, pk=pk)
-
-    context = {
-        "product": product,
-    }
-
-    return render(request, "catalog/product_detail.html", context)
-
-
-def add_product(request: HttpRequest) -> HttpResponse:
-    """Контроллер для добавления нового товара."""
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect("catalog:index")
-    else:
-        form = ProductForm()
-
-    context = {
-        "form": form,
-    }
-
-    return render(request, "catalog/add_product.html", context)
+        return render(request, self.template_name, context)

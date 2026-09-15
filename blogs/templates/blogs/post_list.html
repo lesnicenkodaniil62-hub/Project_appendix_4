@@ -1,0 +1,82 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}Блог - Интернет-магазин{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Блог</h1>
+    <a href="{% url 'blogs:post_create' %}" class="btn btn-primary">+ Добавить запись</a>
+</div>
+
+{% if posts %}
+<div class="row">
+    {% for post in posts %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if post.preview %}
+            <img src="{{ post.preview.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <p class="text-muted mb-0">Нет изображения</p>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ post.title }}</h5>
+                <p class="card-text text-muted small">
+                    {{ post.created_at|date:"d.m.Y" }} | 👁 {{ post.view_count }}
+                </p>
+                <p class="card-text">{{ post.content|truncatechars:100 }}</p>
+            </div>
+            <div class="card-footer bg-white border-top-0">
+                <a href="{% url 'blogs:post_detail' post.pk %}" class="btn btn-primary w-100">Читать далее</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Навигация по страницам">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">Первая</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">← Предыдущая</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Первая</span></li>
+        <li class="page-item disabled"><span class="page-link">← Предыдущая</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая →</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Следующая →</span></li>
+        <li class="page-item disabled"><span class="page-link">Последняя</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-info" role="alert">
+    Записей в блоге пока нет.
+</div>
+{% endif %}
+{% endblock %}
