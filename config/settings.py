@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Локальные приложения
     "catalog",
-    "blogs",  # ← Приложение блога (с буквой 's'!)
+    "blogs",
 ]
 
 MIDDLEWARE = [
