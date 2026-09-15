@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "catalog",
+    "blogs",
 ]
 
 MIDDLEWARE = [
@@ -98,3 +99,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Email настройки (для разработки — вывод в консоль)
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER", "noreply@example.com")
+SERVER_EMAIL = os.getenv("EMAIL_HOST_USER", "noreply@example.com")
