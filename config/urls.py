@@ -23,7 +23,7 @@ from django.urls import URLPattern, URLResolver, include, path
 urlpatterns: list[URLPattern | URLResolver] = [
     path("admin/", admin.site.urls),
     path("", include("catalog.urls", namespace="catalog")),
-    path("blogs/", include("blogs.urls", namespace="blogs")),  # ← blogs/ (с 's'!)
+    path("blogs/", include("blogs.urls", namespace="blogs")),
 ]
 
 if settings.DEBUG:

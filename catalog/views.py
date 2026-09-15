@@ -16,9 +16,11 @@ class ProductListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
+        """Возвращаем все товары."""
         return Product.objects.all()
 
     def get_context_data(self, **kwargs):
+        """Добавляем вывод последних 5 товаров в консоль."""
         context = super().get_context_data(**kwargs)
         latest_products = Product.objects.order_by("-created_at")[:5]
         print("\n=== Последние 5 продуктов ===")
