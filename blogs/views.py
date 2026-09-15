@@ -40,6 +40,11 @@ class BlogPostDetailView(DetailView):
 
     def _send_congratulation_email(self, post: BlogPost) -> None:
         """Отправка поздравительного письма при достижении 100 просмотров."""
+        # Проверяем, что email настроен
+        if not settings.EMAIL_HOST_USER:
+            print("Email не настроен в settings.py")
+            return
+
         subject = f"Поздравляем! Статья '{post.title}' достигла 100 просмотров!"
         message = (
             f"Поздравляем!\n\n"
