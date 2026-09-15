@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Локальные приложения
     "catalog",
-    "blogs",
+    "blogs",  # ← Приложение блога (с буквой 's'!)
 ]
 
 MIDDLEWARE = [
@@ -65,7 +65,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -78,24 +77,14 @@ DATABASES = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
 LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = "Europe/Moscow"
@@ -105,35 +94,25 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# Media files (User uploaded files)
+# Media files
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ==========================================================
-# Email настройки (для доп. задания — письмо при 100 просмотрах)
+# Email настройки (Gmail)
 # ==========================================================
-
-# Вариант 1: Консольный бэкенд (для разработки)
-# Письма будут выводиться в терминал вместо реальной отправки
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-# Вариант 2: Реальный SMTP (для продакшена)
-# Раскомментируйте и настройте .env для реальной отправки писем
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = "smtp.yandex.ru"
-# EMAIL_PORT = 465
-# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-# EMAIL_USE_SSL = True
-
-# Общие настройки email
-DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER", "noreply@example.com")
-SERVER_EMAIL = os.getenv("EMAIL_HOST_USER", "noreply@example.com")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
+SERVER_EMAIL = os.getenv("EMAIL_HOST_USER")
