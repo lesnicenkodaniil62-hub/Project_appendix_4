@@ -27,12 +27,12 @@ class BlogPostDetailView(DetailView):
     context_object_name = "post"
 
     def get_object(self, queryset=None):
-        """Увеличиваем счётчик просмотров при просмотре записи."""
+        """Увеличиваем счётчик просмотров и отправляем письмо при 100 просмотрах."""
         obj = super().get_object(queryset)
         obj.view_count += 1
         obj.save(update_fields=["view_count"])
 
-        # Проверка достижения 100 просмотров (доп. задание)
+        # Проверка достижения 100 просмотров
         if obj.view_count == 100:
             self._send_congratulation_email(obj)
 
