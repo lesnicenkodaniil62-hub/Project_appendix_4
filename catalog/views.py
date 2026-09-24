@@ -1,7 +1,7 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, TemplateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
 from .forms import ProductForm
 from .models import Product
@@ -44,6 +44,26 @@ class ProductCreateView(CreateView):
     model = Product
     form_class = ProductForm
     template_name = "catalog/add_product.html"
+    success_url = reverse_lazy("catalog:index")
+
+
+class ProductUpdateView(UpdateView):
+    """Контроллер редактирования товара."""
+
+    model = Product
+    form_class = ProductForm
+    template_name = "catalog/product_update.html"
+
+    def get_success_url(self):
+        """После редактирования — редирект на страницу товара."""
+        return reverse_lazy("catalog:product_detail", kwargs={"pk": self.object.pk})
+
+
+class ProductDeleteView(DeleteView):
+    """Контроллер удаления товара."""
+
+    model = Product
+    template_name = "catalog/product_confirm_delete.html"
     success_url = reverse_lazy("catalog:index")
 
 
