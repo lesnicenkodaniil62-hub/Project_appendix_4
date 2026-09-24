@@ -11,24 +11,39 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ["name", "description", "image", "category", "price"]
-        widgets = {
-            "name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Название товара"}
-            ),
-            "description": forms.Textarea(
-                attrs={"class": "form-control", "rows": 4, "placeholder": "Описание товара"}
-            ),
-            "image": forms.ClearableFileInput(attrs={"class": "form-control"}),
-            "category": forms.Select(attrs={"class": "form-select"}),
-            "price": forms.NumberInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Цена",
-                    "step": "0.01",
-                    "min": "0",
-                }
-            ),
-        }
+
+    def __init__(self, *args, **kwargs):
+        """Стилизация всех полей формы через __init__."""
+        super().__init__(*args, **kwargs)
+
+        # Проходим по всем полям формы и применяем стили
+        for field_name, field in self.fields.items():
+            # Получаем текущие атрибуты виджета (или создаём пустой словарь)
+            css_class = "form-control"
+
+            # Для полей выбора (Select) используем form-select
+            if isinstance(field.widget, forms.Select):
+                css_class = "form-select"
+
+            # Для чекбоксов используем form-check-input
+            elif isinstance(field.widget, forms.CheckboxInput):
+                css_class = "form-check-input"
+
+            # Для загрузки файлов используем form-control
+            elif isinstance(field.widget, forms.ClearableFileInput):
+                css_class = "form-control"
+
+            # Применяем класс к виджету
+            existing_class = field.widget.attrs.get("class", "")
+            if existing_class:
+                field.widget.attrs["class"] = f"{existing_class} {css_class}"
+            else:
+                field.widget.attrs["class"] = css_class
+
+        # Дополнительные атрибуты для конкретных полей
+        self.fields["name"].widget.attrs.update({"placeholder": "Введите название товара"})
+        self.fields["description"].widget.attrs.update({"placeholder": "Введите описание товара", "rows": 4})
+        self.fields["price"].widget.attrs.update({"placeholder": "Укажите цену", "step": "0.01", "min": "0"})
 
     def _check_forbidden_words(self, text: str) -> None:
         """Проверка текста на наличие запрещённых слов (регистронезависимо)."""
@@ -39,8 +54,7 @@ class ProductForm(forms.ModelForm):
         for word in FORBIDDEN_WORDS:
             if word in text_lower:
                 raise ValidationError(
-                    f"В тексте обнаружено запрещённое слово: '{word}'. "
-                    f"Пожалуйста, удалите его и попробуйте снова."
+                    f"В тексте обнаружено запрещённое слово: '{word}'. " f"Пожалуйста, удалите его и попробуйте снова."
                 )
 
     def clean_name(self) -> str:
@@ -59,11 +73,9 @@ class ProductForm(forms.ModelForm):
         """Валидация поля price — цена не может быть отрицательной."""
         price = self.cleaned_data.get("price")
 
-        # Проверяем, что цена указана
         if price is None:
             raise ValidationError("Пожалуйста, укажите цену товара.")
 
-        # Проверяем, что цена не отрицательная
         if price < 0:
             raise ValidationError(
                 f"Цена не может быть отрицательной. "
