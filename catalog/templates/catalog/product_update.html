@@ -1,0 +1,74 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}Редактирование товара - Интернет-магазин{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'catalog:index' %}">Каталог</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'catalog:product_detail' product.pk %}">{{ product.name }}</a></li>
+            <li class="breadcrumb-item active">Редактирование</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">Редактирование товара</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Название</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">Изображение</label>
+                            {{ form.image }}
+                            {% if product.image %}
+                            <div class="mt-2">
+                                <img src="{{ product.image.url }}" alt="Текущее изображение" style="max-height: 150px;">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
+                            {{ form.category }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.price.id_for_label }}" class="form-label">Цена</label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                            <div class="text-danger small mt-1">{{ form.price.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-secondary">← Отмена</a>
+                            <button type="submit" class="btn btn-warning">Сохранить изменения</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
