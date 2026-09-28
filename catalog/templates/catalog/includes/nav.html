@@ -1,23 +1,123 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="/home/">Интернет-магазин</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <!-- Бренд (логотип) -->
+        <a class="navbar-brand fw-bold" href="{% url 'catalog:index' %}">
+            🛒 Интернет-магазин
+        </a>
+
+        <!-- Кнопка для мобильных устройств -->
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="Переключить навигацию"
+        >
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
+
+        <!-- Основное меню -->
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <!-- Левая часть: основные ссылки -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/home/' %}active{% endif %}" href="/home/">Каталог</a>
+                    <a
+                        class="nav-link {% if request.resolver_match.url_name == 'index' %}active fw-bold{% endif %}"
+                        href="{% url 'catalog:index' %}"
+                    >
+                        🏠 Каталог
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if '/blogs/' in request.path %}active{% endif %}" href="{% url 'blogs:post_list' %}">Блог</a>
+                    <a
+                        class="nav-link {% if request.resolver_match.namespace == 'blogs' %}active fw-bold{% endif %}"
+                        href="{% url 'blogs:post_list' %}"
+                    >
+                        📰 Блог
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/product/add/' %}active{% endif %}" href="{% url 'catalog:add_product' %}">Добавить товар</a>
+                    <a
+                        class="nav-link {% if request.resolver_match.url_name == 'contacts' %}active fw-bold{% endif %}"
+                        href="{% url 'catalog:contacts' %}"
+                    >
+                        📞 Контакты
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/contacts/' %}active{% endif %}" href="/contacts/">Контакты</a>
-                </li>
+            </ul>
+
+            <!-- Правая часть: авторизация -->
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <!-- ✅ Пользователь авторизован -->
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle d-flex align-items-center"
+                            href="#"
+                            id="userDropdown"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <!-- Аватар пользователя (если есть) -->
+                            {% if user.avatar %}
+                                <img
+                                    src="{{ user.avatar.url }}"
+                                    alt="Аватар"
+                                    class="rounded-circle me-2"
+                                    style="width: 32px; height: 32px; object-fit: cover;"
+                                >
+                            {% else %}
+                                <span class="me-2 fs-5">👤</span>
+                            {% endif %}
+                            <span>{{ user.email }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a
+                                    class="dropdown-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
+                                    href="{% url 'users:profile' %}"
+                                >
+                                    👤 Мой профиль
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    class="dropdown-item {% if request.resolver_match.url_name == 'profile_update' %}active{% endif %}"
+                                    href="{% url 'users:profile_update' %}"
+                                >
+                                    ✏️ Редактировать профиль
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
+                                    🚪 Выйти
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <!-- ❌ Пользователь не авторизован -->
+                    <li class="nav-item">
+                        <a
+                            class="nav-link {% if request.resolver_match.url_name == 'login' %}active fw-bold{% endif %}"
+                            href="{% url 'users:login' %}"
+                        >
+                            🔐 Войти
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a
+                            class="nav-link btn btn-outline-light btn-sm ms-lg-2 mt-2 mt-lg-0 px-3 {% if request.resolver_match.url_name == 'register' %}active{% endif %}"
+                            href="{% url 'users:register' %}"
+                        >
+                            📝 Регистрация
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
