@@ -9,10 +9,7 @@ from .models import Product
 
 
 class ProductListView(ListView):
-    """Контроллер главной страницы со списком товаров и пагинацией.
-
-    ДОСТУПНА всем (в том числе анонимным пользователям).
-    """
+    """Список товаров — ПУБЛИЧНАЯ страница."""
 
     model = Product
     template_name = "catalog/home.html"
@@ -20,11 +17,9 @@ class ProductListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        """Возвращаем все товары."""
         return Product.objects.all()
 
     def get_context_data(self, **kwargs):
-        """Добавляем вывод последних 5 товаров в консоль."""
         context = super().get_context_data(**kwargs)
         latest_products = Product.objects.order_by("-created_at")[:5]
         print("\n=== Последние 5 продуктов ===")
@@ -34,22 +29,16 @@ class ProductListView(ListView):
         return context
 
 
-class ProductDetailView(LoginRequiredMixin, DetailView):
-    """Контроллер детальной страницы товара.
-
-    Доступ только для авторизованных пользователей.
-    """
+class ProductDetailView(LoginRequiredMixin, DetailView):  # ← ЗАЩИЩЁН
+    """Детальная страница товара."""
 
     model = Product
     template_name = "catalog/product_detail.html"
     context_object_name = "product"
 
 
-class ProductCreateView(LoginRequiredMixin, CreateView):
-    """Контроллер добавления нового товара.
-
-    Доступ только для авторизованных пользователей.
-    """
+class ProductCreateView(LoginRequiredMixin, CreateView):  # ← ЗАЩИЩЁН
+    """Создание товара."""
 
     model = Product
     form_class = ProductForm
@@ -57,26 +46,19 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("catalog:index")
 
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
-    """Контроллер редактирования товара.
-
-    Доступ только для авторизованных пользователей.
-    """
+class ProductUpdateView(LoginRequiredMixin, UpdateView):  # ← ЗАЩИЩЁН
+    """Редактирование товара."""
 
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_update.html"
 
     def get_success_url(self):
-        """После редактирования — редирект на страницу товара."""
         return reverse_lazy("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
-    """Контроллер удаления товара.
-
-    Доступ только для авторизованных пользователей.
-    """
+class ProductDeleteView(LoginRequiredMixin, DeleteView):  # ←  ЗАЩИЩЁН
+    """Удаление товара."""
 
     model = Product
     template_name = "catalog/product_confirm_delete.html"
@@ -84,26 +66,20 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class ContactView(TemplateView):
-    """Контроллер страницы контактов на TemplateView.
-
-    ДОСТУПНА всем (в том числе анонимным пользователям).
-    """
+    """Контакты — ПУБЛИЧНАЯ страница."""
 
     template_name = "catalog/contacts.html"
 
     def get_context_data(self, **kwargs):
-        """Добавляем переменную success в контекст для GET-запросов."""
         context = super().get_context_data(**kwargs)
         context["success"] = False
         return context
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Обработка POST-запроса."""
         name = request.POST.get("name")
         phone = request.POST.get("phone")
         message = request.POST.get("message")
         print(f"Получено сообщение от {name} ({phone}): {message}")
-
         context = self.get_context_data(**kwargs)
         context["success"] = True
         return render(request, self.template_name, context)
