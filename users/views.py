@@ -1,118 +1,116 @@
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth import authenticate, get_user_model, login, logout
-from django.core.mail import send_mail
-from django.shortcuts import redirect, render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views import View
-from django.views.generic import CreateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
-from .forms import UserLoginForm, UserRegistrationForm
-
-User = get_user_model()
-
-
-class RegisterView(CreateView):
-    """Представление регистрации нового пользователя."""
-
-    form_class = UserRegistrationForm
-    template_name = "users/register.html"
-    success_url = reverse_lazy("users:login")
-
-    def form_valid(self, form):
-        """Сохраняем пользователя и отправляем приветственное письмо."""
-        # Сохраняем пользователя (пароль хешируется в форме)
-        user = form.save()
-
-        # Отправляем приветственное письмо
-        self._send_welcome_email(user)
-
-        # Сообщение об успешной регистрации
-        messages.success(
-            self.request,
-            f"Регистрация прошла успешно! Теперь вы можете войти в систему.",
-        )
-
-        return redirect(self.success_url)
-
-    def _send_welcome_email(self, user: User) -> None:
-        """Отправка приветственного письма после регистрации."""
-        if not settings.EMAIL_HOST_USER:
-            print("Email не настроен — письмо не отправлено")
-            return
-
-        subject = f"Добро пожаловать, {user.first_name or user.email}!"
-        message = (
-            f"Здравствуйте, {user.first_name or user.email}!\n\n"
-            f"Спасибо за регистрацию в нашем интернет-магазине.\n\n"
-            f"Ваш email: {user.email}\n"
-            f"Теперь вы можете:\n"
-            f"• Просматривать товары\n"
-            f"• Оставлять отзывы\n"
-            f"• Делать заказы\n\n"
-            f"Если у вас есть вопросы — ответим на это письмо.\n\n"
-            f"С уважением,\n"
-            f"Команда интернет-магазина"
-        )
-
-        try:
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-            print(f"Приветственное письмо отправлено на {user.email}")
-        except Exception as e:
-            print(f"Ошибка отправки письма: {e}")
+from .forms import ProductForm
+from .models import Product
 
 
-class LoginView(View):
-    """Представление авторизации пользователя."""
+class ProductListView(ListView):
+    """Контроллер главной страницы со списком товаров и пагинацией.
 
-    template_name = "users/login.html"
+    ДОСТУПНА всем (в том числе анонимным пользователям).
+    """
 
-    def get(self, request):
-        """Отображение формы входа."""
-        if request.user.is_authenticated:
-            return redirect("catalog:index")
+    model = Product
+    template_name = "catalog/home.html"
+    context_object_name = "page_obj"
+    paginate_by = 6
 
-        form = UserLoginForm()
-        return render(request, self.template_name, {"form": form})
+    def get_queryset(self):
+        """Возвращаем все товары."""
+        return Product.objects.all()
 
-    def post(self, request):
-        """Обработка формы входа."""
-        form = UserLoginForm(request.POST)
-
-        if form.is_valid():
-            email = form.cleaned_data["email"]
-            password = form.cleaned_data["password"]
-
-            # Аутентификация пользователя
-            user = authenticate(request, username=email, password=password)
-
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    messages.success(request, f"Добро пожаловать, {user.email}!")
-                    return redirect("catalog:index")
-                else:
-                    messages.error(
-                        request, "Ваш аккаунт деактивирован. Обратитесь в поддержку."
-                    )
-            else:
-                messages.error(
-                    request, "Неверный email или пароль. Попробуйте ещё раз."
-                )
-
-        return render(request, self.template_name, {"form": form})
+    def get_context_data(self, **kwargs):
+        """Добавляем вывод последних 5 товаров в консоль."""
+        context = super().get_context_data(**kwargs)
+        latest_products = Product.objects.order_by("-created_at")[:5]
+        print("\n=== Последние 5 продуктов ===")
+        for product in latest_products:
+            print(f"ID: {product.id} | Название: {product.name} | Цена: {product.price}")
+        print("==============================\n")
+        return context
 
 
-class LogoutView(View):
-    """Представление выхода из системы."""
+class ProductDetailView(LoginRequiredMixin, DetailView):
+    """Контроллер детальной страницы товара.
 
-    def get(self, request):
-        logout(request)
-        messages.success(request, "Вы успешно вышли из системы.")
-        return redirect("users:login")
+    Доступ только для авторизованных пользователей.
+    """
+
+    model = Product
+    template_name = "catalog/product_detail.html"
+    context_object_name = "product"
+
+
+class ProductCreateView(LoginRequiredMixin, CreateView):
+    """Контроллер добавления нового товара.
+
+    Доступ только для авторизованных пользователей.
+    """
+
+    model = Product
+    form_class = ProductForm
+    template_name = "catalog/add_product.html"
+    success_url = reverse_lazy("catalog:index")
+
+
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
+    """Контроллер редактирования товара.
+
+    Доступ только для авторизованных пользователей.
+    """
+
+    model = Product
+    form_class = ProductForm
+    template_name = "catalog/product_update.html"
+
+    def get_success_url(self):
+        """После редактирования — редирект на страницу товара."""
+        return reverse_lazy("catalog:product_detail", kwargs={"pk": self.object.pk})
+
+
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    """Контроллер удаления товара.
+
+    Доступ только для авторизованных пользователей.
+    """
+
+    model = Product
+    template_name = "catalog/product_confirm_delete.html"
+    success_url = reverse_lazy("catalog:index")
+
+
+class ContactView(TemplateView):
+    """Контроллер страницы контактов на TemplateView.
+
+    ДОСТУПНА всем (в том числе анонимным пользователям).
+    """
+
+    template_name = "catalog/contacts.html"
+
+    def get_context_data(self, **kwargs):
+        """Добавляем переменную success в контекст для GET-запросов."""
+        context = super().get_context_data(**kwargs)
+        context["success"] = False
+        return context
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Обработка POST-запроса."""
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+        message = request.POST.get("message")
+        print(f"Получено сообщение от {name} ({phone}): {message}")
+
+        context = self.get_context_data(**kwargs)
+        context["success"] = True
+        return render(request, self.template_name, context)
