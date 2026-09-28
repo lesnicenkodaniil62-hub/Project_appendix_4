@@ -1,14 +1,25 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from .forms import ProductForm
 from .models import Product
 
 
 class ProductListView(ListView):
-    """Контроллер главной страницы со списком товаров и пагинацией."""
+    """Контроллер главной страницы со списком товаров и пагинацией.
+
+    ДОСТУПНА всем (в том числе анонимным пользователям).
+    """
 
     model = Product
     template_name = "catalog/home.html"
@@ -30,16 +41,22 @@ class ProductListView(ListView):
         return context
 
 
-class ProductDetailView(DetailView):
-    """Контроллер детальной страницы товара."""
+class ProductDetailView(LoginRequiredMixin, DetailView):
+    """Контроллер детальной страницы товара.
+
+    Доступ только для авторизованных пользователей.
+    """
 
     model = Product
     template_name = "catalog/product_detail.html"
     context_object_name = "product"
 
 
-class ProductCreateView(CreateView):
-    """Контроллер добавления нового товара."""
+class ProductCreateView(LoginRequiredMixin, CreateView):
+    """Контроллер добавления нового товара.
+
+    Доступ только для авторизованных пользователей.
+    """
 
     model = Product
     form_class = ProductForm
@@ -47,8 +64,11 @@ class ProductCreateView(CreateView):
     success_url = reverse_lazy("catalog:index")
 
 
-class ProductUpdateView(UpdateView):
-    """Контроллер редактирования товара."""
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
+    """Контроллер редактирования товара.
+
+    Доступ только для авторизованных пользователей.
+    """
 
     model = Product
     form_class = ProductForm
@@ -59,8 +79,11 @@ class ProductUpdateView(UpdateView):
         return reverse_lazy("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
-class ProductDeleteView(DeleteView):
-    """Контроллер удаления товара."""
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    """Контроллер удаления товара.
+
+    Доступ только для авторизованных пользователей.
+    """
 
     model = Product
     template_name = "catalog/product_confirm_delete.html"
@@ -68,7 +91,10 @@ class ProductDeleteView(DeleteView):
 
 
 class ContactView(TemplateView):
-    """Контроллер страницы контактов на TemplateView."""
+    """Контроллер страницы контактов на TemplateView.
+
+    ДОСТУПНА всем (в том числе анонимным пользователям).
+    """
 
     template_name = "catalog/contacts.html"
 
