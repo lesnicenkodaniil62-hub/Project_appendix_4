@@ -21,7 +21,7 @@ class RegisterView(CreateView):
 
     def form_valid(self, form):
         """Сохраняем пользователя и отправляем приветственное письмо."""
-        # Сохраняем пользователя (пароль хешируется в форме)
+        # Сохраняем пользователя (пароль хешируется в форме через set_password)
         user = form.save()
 
         # Отправляем приветственное письмо
@@ -30,7 +30,7 @@ class RegisterView(CreateView):
         # Сообщение об успешной регистрации
         messages.success(
             self.request,
-            f"Регистрация прошла успешно! Теперь вы можете войти в систему.",
+            "Регистрация прошла успешно! Теперь вы можете войти в систему.",
         )
 
         return redirect(self.success_url)
@@ -69,12 +69,13 @@ class RegisterView(CreateView):
 
 
 class LoginView(View):
-    """Представление авторизации пользователя."""
+    """Представление авторизации пользователя по email и паролю."""
 
     template_name = "users/login.html"
 
     def get(self, request):
         """Отображение формы входа."""
+        # Если пользователь уже авторизован — редирект на главную
         if request.user.is_authenticated:
             return redirect("catalog:index")
 
@@ -90,6 +91,9 @@ class LoginView(View):
             password = form.cleaned_data["password"]
 
             # Аутентификация пользователя
+            # ⚠️ ВАЖНО: username=email — это особенность Django,
+            # функция authenticate всегда ожидает параметр username,
+            # даже если у нас поле называется email
             user = authenticate(request, username=email, password=password)
 
             if user is not None:
@@ -113,6 +117,7 @@ class LogoutView(View):
     """Представление выхода из системы."""
 
     def get(self, request):
+        """Выход из системы и редирект на страницу входа."""
         logout(request)
         messages.success(request, "Вы успешно вышли из системы.")
         return redirect("users:login")
