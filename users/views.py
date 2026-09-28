@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
@@ -9,8 +9,7 @@ from django.views import View
 from django.views.generic import CreateView, UpdateView
 
 from .forms import UserLoginForm, UserProfileForm, UserRegistrationForm
-
-User = get_user_model()
+from .models import CustomUser  # Импортируем модель для корректной типизации
 
 
 class RegisterView(CreateView):
@@ -22,21 +21,15 @@ class RegisterView(CreateView):
 
     def form_valid(self, form):
         """Сохраняем пользователя и отправляем приветственное письмо."""
-        # Сохраняем пользователя (пароль хешируется в форме через set_password)
-        user = form.save()
-
-        # Отправляем приветственное письмо
+        user: CustomUser = form.save()
         self._send_welcome_email(user)
-
-        # Сообщение об успешной регистрации
         messages.success(
             self.request,
             "Регистрация прошла успешно! Теперь вы можете войти в систему.",
         )
-
         return redirect(self.success_url)
 
-    def _send_welcome_email(self, user: User) -> None:
+    def _send_welcome_email(self, user: CustomUser) -> None:
         """Отправка приветственного письма после регистрации."""
         if not settings.EMAIL_HOST_USER:
             print("Email не настроен — письмо не отправлено")
@@ -76,7 +69,6 @@ class LoginView(View):
 
     def get(self, request):
         """Отображение формы входа."""
-        # Если пользователь уже авторизован — редирект на главную
         if request.user.is_authenticated:
             return redirect("catalog:index")
 
@@ -92,24 +84,18 @@ class LoginView(View):
             password = form.cleaned_data["password"]
 
             # Аутентификация пользователя
-            # ⚠️ ВАЖНО: username=email — это особенность Django,
-            # функция authenticate всегда ожидает параметр username,
-            # даже если у нас поле называется email
             user = authenticate(request, username=email, password=password)
 
-            if user is not None:
+            # isinstance сужает тип для mypy, подтверждая, что это наш CustomUser
+            if user is not None and isinstance(user, CustomUser):
                 if user.is_active:
                     login(request, user)
                     messages.success(request, f"Добро пожаловать, {user.email}!")
                     return redirect("catalog:index")
                 else:
-                    messages.error(
-                        request, "Ваш аккаунт деактивирован. Обратитесь в поддержку."
-                    )
+                    messages.error(request, "Ваш аккаунт деактивирован. Обратитесь в поддержку.")
             else:
-                messages.error(
-                    request, "Неверный email или пароль. Попробуйте ещё раз."
-                )
+                messages.error(request, "Неверный email или пароль. Попробуйте ещё раз.")
 
         return render(request, self.template_name, {"form": form})
 
@@ -125,10 +111,7 @@ class LogoutView(View):
 
 
 class ProfileView(LoginRequiredMixin, View):
-    """Представление просмотра профиля пользователя.
-
-    🔒 Доступ только для авторизованных пользователей.
-    """
+    """Представление просмотра профиля пользователя."""
 
     template_name = "users/profile.html"
 
@@ -138,12 +121,9 @@ class ProfileView(LoginRequiredMixin, View):
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
-    """Представление редактирования профиля пользователя.
+    """Представление редактирования профиля пользователя."""
 
-    🔒 Доступ только для авторизованных пользователей.
-    """
-
-    model = User
+    model = CustomUser  # <-- Явно указываем нашу модель
     form_class = UserProfileForm
     template_name = "users/profile_update.html"
     success_url = reverse_lazy("users:profile")

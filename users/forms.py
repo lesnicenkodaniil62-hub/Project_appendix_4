@@ -10,36 +10,22 @@ class UserRegistrationForm(forms.ModelForm):
     # Дополнительные поля пароля (не из модели)
     password1 = forms.CharField(
         label="Пароль",
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Введите пароль"}
-        ),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Введите пароль"}),
     )
     password2 = forms.CharField(
         label="Подтверждение пароля",
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Повторите пароль"}
-        ),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Повторите пароль"}),
     )
 
     class Meta:
         model = User
         fields = ["email", "first_name", "last_name", "phone", "country", "avatar"]
         widgets = {
-            "email": forms.EmailInput(
-                attrs={"class": "form-control", "placeholder": "example@mail.com"}
-            ),
-            "first_name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Иван"}
-            ),
-            "last_name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Иванов"}
-            ),
-            "phone": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "+7 999 123-45-67"}
-            ),
-            "country": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Россия"}
-            ),
+            "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "example@mail.com"}),
+            "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Иван"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Иванов"}),
+            "phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "+7 999 123-45-67"}),
+            "country": forms.TextInput(attrs={"class": "form-control", "placeholder": "Россия"}),
             "avatar": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
 
@@ -51,9 +37,7 @@ class UserRegistrationForm(forms.ModelForm):
             existing_class = field.widget.attrs.get("class", "")
             if "form-control" not in existing_class:
                 if isinstance(field.widget, forms.ClearableFileInput):
-                    field.widget.attrs["class"] = (
-                        f"{existing_class} form-control".strip()
-                    )
+                    field.widget.attrs["class"] = f"{existing_class} form-control".strip()
 
     def clean_password2(self):
         """Проверка совпадения паролей."""
@@ -79,15 +63,11 @@ class UserLoginForm(forms.Form):
 
     email = forms.EmailField(
         label="Email",
-        widget=forms.EmailInput(
-            attrs={"class": "form-control", "placeholder": "example@mail.com"}
-        ),
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "example@mail.com"}),
     )
     password = forms.CharField(
         label="Пароль",
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Введите пароль"}
-        ),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Введите пароль"}),
     )
 
 
@@ -105,18 +85,10 @@ class UserProfileForm(forms.ModelForm):
                     "readonly": True,  # Email нельзя менять — это логин
                 }
             ),
-            "first_name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Иван"}
-            ),
-            "last_name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Иванов"}
-            ),
-            "phone": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "+7 999 123-45-67"}
-            ),
-            "country": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Россия"}
-            ),
+            "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Иван"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Иванов"}),
+            "phone": forms.TextInput(attrs={"class": "form-control", "placeholder": "+7 999 123-45-67"}),
+            "country": forms.TextInput(attrs={"class": "form-control", "placeholder": "Россия"}),
             "avatar": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
 
@@ -127,6 +99,4 @@ class UserProfileForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             existing_class = field.widget.attrs.get("class", "")
             if "form-control" not in existing_class:
-                field.widget.attrs["class"] = (
-                    f"{existing_class} form-control".strip()
-                )
+                field.widget.attrs["class"] = f"{existing_class} form-control".strip()

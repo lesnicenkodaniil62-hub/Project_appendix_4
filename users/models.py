@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
@@ -5,18 +7,19 @@ from django.db import models
 class CustomUserManager(BaseUserManager):
     """Менеджер для кастомной модели пользователя с email в качестве USERNAME_FIELD."""
 
-    def create_user(self, email: str, password: str | None = None, **extra_fields):
+    def create_user(self, email: str, password: str | None = None, **extra_fields: Any) -> "CustomUser":
         """Создание обычного пользователя."""
         if not email:
             raise ValueError("Email обязателен для создания пользователя")
 
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        # Используем cast, чтобы mypy знал, что это CustomUser, а не абстрактный тип
+        user = cast("CustomUser", self.model(email=email, **extra_fields))
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email: str, password: str | None = None, **extra_fields):
+    def create_superuser(self, email: str, password: str | None = None, **extra_fields: Any) -> "CustomUser":
         """Создание суперпользователя."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
@@ -33,8 +36,8 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     """Кастомная модель пользователя с email в качестве USERNAME_FIELD."""
 
-    # Убираем стандартное поле username
-    username = None
+    # Отключаем стандартное поле username
+    username = None  # type: ignore
 
     # Email как основное поле для авторизации
     email = models.EmailField(
@@ -43,7 +46,7 @@ class CustomUser(AbstractUser):
         help_text="Введите email для входа в систему",
     )
 
-    # дополнительных поля по заданию
+    # Дополнительные поля по заданию
     avatar = models.ImageField(
         upload_to="users/avatars/",
         blank=True,
@@ -67,11 +70,12 @@ class CustomUser(AbstractUser):
     )
 
     # Указываем email как поле для авторизации
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    # Простой type: ignore надёжно подавляет все предупреждения mypy для этих строк
+    USERNAME_FIELD = "email"  # type: ignore
+    REQUIRED_FIELDS: list[str] = []  # type: ignore
 
     # Кастомный менеджер
-    objects = CustomUserManager()
+    objects = CustomUserManager()  # type: ignore
 
     class Meta:
         verbose_name = "Пользователь"
