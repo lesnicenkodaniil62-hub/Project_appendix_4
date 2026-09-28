@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
-from .forms import UserLoginForm, UserRegistrationForm
+from .forms import UserLoginForm, UserProfileForm, UserRegistrationForm
 
 User = get_user_model()
 
@@ -63,9 +64,9 @@ class RegisterView(CreateView):
                 recipient_list=[user.email],
                 fail_silently=False,
             )
-            print(f"Приветственное письмо отправлено на {user.email}")
+            print(f"✅ Приветственное письмо отправлено на {user.email}")
         except Exception as e:
-            print(f"Ошибка отправки письма: {e}")
+            print(f"❌ Ошибка отправки письма: {e}")
 
 
 class LoginView(View):
@@ -121,3 +122,44 @@ class LogoutView(View):
         logout(request)
         messages.success(request, "Вы успешно вышли из системы.")
         return redirect("users:login")
+
+
+class ProfileView(LoginRequiredMixin, View):
+    """Представление просмотра профиля пользователя.
+
+    🔒 Доступ только для авторизованных пользователей.
+    """
+
+    template_name = "users/profile.html"
+
+    def get(self, request):
+        """Отображение профиля текущего пользователя."""
+        return render(request, self.template_name, {"user": request.user})
+
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    """Представление редактирования профиля пользователя.
+
+    🔒 Доступ только для авторизованных пользователей.
+    """
+
+    model = User
+    form_class = UserProfileForm
+    template_name = "users/profile_update.html"
+    success_url = reverse_lazy("users:profile")
+
+    def get_object(self, queryset=None):
+        """Возвращаем текущего авторизованного пользователя."""
+        return self.request.user
+
+    def form_valid(self, form):
+        """Обработка успешного сохранения формы."""
+        messages.success(self.request, "Профиль успешно обновлён!")
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        """Передаём файлы формы (для загрузки аватара)."""
+        kwargs = super().get_form_kwargs()
+        if self.request.FILES:
+            kwargs["files"] = self.request.FILES
+        return kwargs
