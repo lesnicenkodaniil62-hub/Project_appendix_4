@@ -73,7 +73,7 @@ class Product(models.Model):
         help_text="Пользователь, создавший товар",
     )
 
-    # Статус публикации (False = не опубликовано)
+    # Статус публикации
     is_published = models.BooleanField(
         default=False,
         verbose_name="Опубликовано",

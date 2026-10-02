@@ -19,11 +19,9 @@ class ProductListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        """Возвращаем все товары."""
         return Product.objects.all()
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Добавляем вывод последних 5 товаров в консоль."""
         context = super().get_context_data(**kwargs)
         latest_products = Product.objects.order_by("-created_at")[:5]
         print("\n=== Последние 5 продуктов ===")
@@ -44,7 +42,7 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """Создание товара.
 
-    ✅ При создании автоматически заполняется поле owner.
+    При создании автоматически заполняется поле owner.
     """
 
     model = Product
@@ -58,32 +56,23 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        """После создания — редирект на главную."""
         return reverse("catalog:index")
 
 
 class OwnerOrModeratorMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Миксин: доступ только для владельца товара ИЛИ модератора.
+    """Миксин: доступ только для владельца товара ИЛИ модератора."""
 
-    🔒 Используется в ProductUpdateView и ProductDeleteView.
-    """
-
-    raise_exception = True  # Возвращаем 403 вместо редиректа на login
+    raise_exception = True
 
     def test_func(self) -> bool:
         """Проверка: пользователь — владелец товара или модератор."""
-        # Получаем объект товара (метод есть в UpdateView/DeleteView)
         product: Product = self.get_object()  # type: ignore[attr-defined]
-
-        # ✅ Исправление: используем self.request с type: ignore
         user = self.request  # type: ignore[attr-defined]
         user = user.user
 
-        # Проверка 1: пользователь — владелец товара
         if product.owner_id is not None and product.owner_id == user.pk:
             return True
 
-        # Проверка 2: пользователь — модератор (есть право can_unpublish_product)
         if user.has_perm("catalog.can_unpublish_product"):
             return True
 
@@ -101,8 +90,6 @@ class ProductUpdateView(OwnerOrModeratorMixin, UpdateView):
     template_name = "catalog/product_update.html"
 
     def get_success_url(self) -> str:
-        """После редактирования — редирект на страницу товара."""
-        # ✅ Исправление: используем reverse() вместо reverse_lazy()
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
@@ -117,7 +104,6 @@ class ProductDeleteView(OwnerOrModeratorMixin, DeleteView):
     success_url = "/"
 
     def get_success_url(self) -> str:
-        """После удаления — редирект на главную."""
         return reverse("catalog:index")
 
 
@@ -127,18 +113,15 @@ class ContactView(TemplateView):
     template_name = "catalog/contacts.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Добавляем переменную success в контекст для GET-запросов."""
         context = super().get_context_data(**kwargs)
         context["success"] = False
         return context
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        """Обработка POST-запроса."""
         name = request.POST.get("name")
         phone = request.POST.get("phone")
         message = request.POST.get("message")
         print(f"Получено сообщение от {name} ({phone}): {message}")
-
         context = self.get_context_data(**kwargs)
         context["success"] = True
         return render(request, self.template_name, context)

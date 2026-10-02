@@ -87,11 +87,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = "ru-ru"
-
 TIME_ZONE = "Europe/Moscow"
-
 USE_I18N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -105,9 +102,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ==========================================================
 # Email настройки (Gmail)
-# ==========================================================
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -118,14 +113,10 @@ EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 SERVER_EMAIL = os.getenv("EMAIL_HOST_USER")
 
-# ==========================================================
 # Настройки кастомной модели пользователя
-# ==========================================================
 AUTH_USER_MODEL = "users.CustomUser"
 
-# ==========================================================
 # Настройки аутентификации
-# ==========================================================
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "catalog:index"
 LOGOUT_REDIRECT_URL = "users:login"
