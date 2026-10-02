@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -5,8 +6,8 @@ class Category(models.Model):
     """Модель категории товара."""
 
     name = models.CharField(
-        max_length=150,
-        verbose_name="Наименование",
+        max_length=100,
+        verbose_name="Название категории",
         help_text="Введите название категории",
     )
     description = models.TextField(
@@ -19,7 +20,6 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
-        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name
@@ -29,38 +29,57 @@ class Product(models.Model):
     """Модель товара."""
 
     name = models.CharField(
-        max_length=150,
-        verbose_name="Наименование",
-        help_text="Введите название продукта",
+        max_length=200,
+        verbose_name="Название",
+        help_text="Введите название товара",
     )
     description = models.TextField(
         blank=True,
         null=True,
         verbose_name="Описание",
-        help_text="Введите описание продукта",
+        help_text="Введите описание товара",
     )
     image = models.ImageField(
         upload_to="photos/",
         blank=True,
         null=True,
         verbose_name="Изображение",
-        help_text="Загрузите изображение продукта",
+        help_text="Загрузите изображение товара",
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
-        related_name="products",
         blank=True,
         null=True,
+        related_name="products",
         verbose_name="Категория",
-        help_text="Выберите категорию продукта",
+        help_text="Выберите категорию товара",
     )
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        verbose_name="Цена за покупку",
-        help_text="Укажите цену продукта",
+        verbose_name="Цена",
+        help_text="Введите цену товара",
     )
+
+    # Владелец товара
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="products",
+        verbose_name="Владелец",
+        help_text="Пользователь, создавший товар",
+    )
+
+    # Статус публикации
+    is_published = models.BooleanField(
+        default=False,
+        verbose_name="Опубликовано",
+        help_text="Если отмечено — товар виден всем пользователям",
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата создания",
@@ -71,46 +90,12 @@ class Product(models.Model):
     )
 
     class Meta:
-        verbose_name = "Продукт"
-        verbose_name_plural = "Продукты"
-        ordering = ["name", "category"]
-
-    def __str__(self) -> str:
-        return f"{self.name} ({self.category})"
-
-
-class Contact(models.Model):
-    """Модель контактных данных."""
-
-    name = models.CharField(
-        max_length=150,
-        verbose_name="Наименование",
-        help_text="Введите название контакта",
-    )
-    email = models.EmailField(
-        blank=True,
-        null=True,
-        verbose_name="Email",
-        help_text="Введите email",
-    )
-    phone = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        verbose_name="Телефон",
-        help_text="Введите номер телефона",
-    )
-    address = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Адрес",
-        help_text="Введите адрес",
-    )
-
-    class Meta:
-        verbose_name = "Контакт"
-        verbose_name_plural = "Контакты"
-        ordering = ["name"]
+        verbose_name = "Товар"
+        verbose_name_plural = "Товары"
+        ordering = ["-created_at"]
+        permissions = [
+            ("can_unpublish_product", "Может отменять публикацию продукта"),
+        ]
 
     def __str__(self) -> str:
         return self.name

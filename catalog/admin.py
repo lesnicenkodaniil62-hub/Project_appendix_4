@@ -1,26 +1,34 @@
 from django.contrib import admin
 
-from .models import Category, Contact, Product
+from .models import Category, Product
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    """Админ-панель для модели Category."""
+    """Админ-панель для категорий."""
 
     list_display = ("id", "name")
+    search_fields = ("name",)
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    """Админ-панель для модели Product."""
+    """Админ-панель для товаров."""
 
-    list_display = ("id", "name", "price", "category")
-    list_filter = ("category",)
+    list_display = ("id", "name", "price", "category", "owner", "is_published", "created_at")
+    list_filter = ("category", "is_published", "owner")
     search_fields = ("name", "description")
+    list_editable = ("is_published",)  # Можно менять статус прямо в списке
 
-
-@admin.register(Contact)
-class ContactAdmin(admin.ModelAdmin):
-    """Админ-панель для модели Contact."""
-
-    list_display = ("id", "name", "email", "phone")
+    fieldsets = (
+        (None, {"fields": ("name", "description", "price", "category", "image")}),
+        (
+            "Публикация и владелец",
+            {"fields": ("owner", "is_published")},
+        ),
+        (
+            "Даты",
+            {"fields": ("created_at", "updated_at")},
+        ),
+    )
+    readonly_fields = ("created_at", "updated_at")
