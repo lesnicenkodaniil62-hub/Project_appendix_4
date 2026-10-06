@@ -102,7 +102,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ==========================================================
 # Email настройки (Gmail)
+# ==========================================================
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -113,15 +115,21 @@ EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 SERVER_EMAIL = os.getenv("EMAIL_HOST_USER")
 
+# ==========================================================
 # Настройки кастомной модели пользователя
+# ==========================================================
 AUTH_USER_MODEL = "users.CustomUser"
 
+# ==========================================================
 # Настройки аутентификации
+# ==========================================================
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "catalog:index"
 LOGOUT_REDIRECT_URL = "users:login"
 
-# Настройки Redis (Кэширование)
+# ==========================================================
+# Настройки Redis (Кэширование) — feature_8
+# ==========================================================
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -132,5 +140,5 @@ CACHES = {
     }
 }
 
-# Время жизни кэша по умолчанию (в секундах)
+# Время жизни кэша по умолчанию (в секундах) — 1 час
 CACHE_TTL = 3600

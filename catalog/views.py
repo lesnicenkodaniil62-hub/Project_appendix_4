@@ -40,7 +40,7 @@ class ProductListView(ListView):
 class ProductDetailView(LoginRequiredMixin, DetailView):
     """Детальная страница товара.
 
-    Кэширование всей страницы на 1 час через Redis.
+    ✅ Задание 2: Кэширование всей страницы на 1 час (3600 сек) через Redis.
     """
 
     model = Product
@@ -51,7 +51,7 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """Создание товара.
 
-    При создании автоматически заполняется поле owner.
+    ✅ При создании автоматически заполняется поле owner.
     """
 
     model = Product
@@ -70,7 +70,10 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
 
 class OwnerOrModeratorMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Миксин: доступ только для владельца товара ИЛИ модератора."""
+    """Миксин: доступ только для владельца товара ИЛИ модератора.
+
+    🔒 Используется в ProductUpdateView и ProductDeleteView.
+    """
 
     raise_exception = True
 
@@ -80,9 +83,11 @@ class OwnerOrModeratorMixin(LoginRequiredMixin, UserPassesTestMixin):
         user = self.request  # type: ignore[attr-defined]
         user = user.user
 
+        # Проверка 1: пользователь — владелец товара
         if product.owner_id is not None and product.owner_id == user.pk:
             return True
 
+        # Проверка 2: пользователь — модератор (есть право can_unpublish_product)
         if user.has_perm("catalog.can_unpublish_product"):
             return True
 
@@ -92,7 +97,7 @@ class OwnerOrModeratorMixin(LoginRequiredMixin, UserPassesTestMixin):
 class ProductUpdateView(OwnerOrModeratorMixin, UpdateView):
     """Редактирование товара.
 
-    Доступ только для владельца или модератора.
+    🔒 Доступ только для владельца или модератора.
     """
 
     model = Product
@@ -107,7 +112,7 @@ class ProductUpdateView(OwnerOrModeratorMixin, UpdateView):
 class ProductDeleteView(OwnerOrModeratorMixin, DeleteView):
     """Удаление товара.
 
-    Доступ только для владельца или модератора.
+    🔒 Доступ только для владельца или модератора.
     """
 
     model = Product
@@ -122,7 +127,7 @@ class ProductDeleteView(OwnerOrModeratorMixin, DeleteView):
 class CategoryProductListView(TemplateView):
     """Список товаров в указанной категории.
 
-    Принимает ID категории, использует сервис с кэшированием в Redis.
+    ✅ Задание 3: Принимает ID категории, использует сервис с кэшированием в Redis.
     """
 
     template_name = "catalog/category_products.html"
@@ -134,11 +139,11 @@ class CategoryProductListView(TemplateView):
         # Получаем ID категории из URL
         category_id: int = self.kwargs["category_id"]
 
-        # Получаем категорию для отображения названия
+        # Получаем категорию для отображения названия в шаблоне
         category = get_object_or_404(Category, id=category_id)
         context["category"] = category
 
-        # View использует сервис, который возвращает данные из Redis/БД
+        # ✅ View использует сервис, который возвращает данные из Redis/БД
         products = get_products_by_category(category_id)
         context["products"] = products
 

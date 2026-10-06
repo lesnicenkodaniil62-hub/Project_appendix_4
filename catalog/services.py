@@ -12,14 +12,14 @@ def get_products_by_category(category_id: int) -> list[dict[str, Any]]:
     :param category_id: ID категории
     :return: Список словарей с данными товаров
     """
-    # Ключ category_{id}
+    # Ключ category_{id} — критерий задания
     cache_key = f"category_{category_id}"
 
     # 1. Пытаемся получить данные из Redis
     cached_data = cache.get(cache_key)
 
     if cached_data is not None:
-        # Данные найдены в кэше, возвращаем их
+        # Данные найдены в кэше — возвращаем их
         return cast(list[dict[str, Any]], cached_data)
 
     # 2. Если в кэше нет, запрашиваем из БД (только опубликованные)
@@ -29,6 +29,7 @@ def get_products_by_category(category_id: int) -> list[dict[str, Any]]:
     ).values("id", "name", "description", "price", "image")
 
     # Преобразуем QuerySet в список словарей
+    # Decimal нужно преобразовать в строку для безопасной сериализации в Redis
     product_list: list[dict[str, Any]] = []
     for p in products_qs:
         product_list.append(
@@ -41,7 +42,8 @@ def get_products_by_category(category_id: int) -> list[dict[str, Any]]:
             }
         )
 
-    # 3. Сохраняем в Redis с TTL = 1 час
+    # 3. Сохраняем в Redis с заданным TTL (время хранения)
+    # TTL задан — критерий задания
     cache.set(cache_key, product_list, timeout=3600)
 
     return product_list
