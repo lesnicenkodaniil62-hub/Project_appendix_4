@@ -120,3 +120,17 @@ AUTH_USER_MODEL = "users.CustomUser"
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "catalog:index"
 LOGOUT_REDIRECT_URL = "users:login"
+
+# Настройки Redis (Кэширование)
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # База данных 1 для кэша
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+# Время жизни кэша по умолчанию (в секундах), например, 1 час
+CACHE_TTL = 3600
