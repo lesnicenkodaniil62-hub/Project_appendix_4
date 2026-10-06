@@ -19,17 +19,24 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-sm">
                         {% if product.image %}
-                            <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                            <img src="{{ product.image }}"
+                                 class="card-img-top"
+                                 alt="{{ product.name }}"
+                                 style="height: 200px; object-fit: cover;">
                         {% else %}
-                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                 style="height: 200px;">
                                 <span class="text-muted">🖼️ Нет изображения</span>
                             </div>
                         {% endif %}
                         <div class="card-body">
                             <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
+                            <p class="card-text text-muted small">
+                                {{ product.description|truncatewords:15 }}
+                            </p>
                             <p class="card-text fw-bold text-success">{{ product.price }} ₽</p>
-                            <a href="{% url 'catalog:product_detail' product.id %}" class="btn btn-primary btn-sm">
+                            <a href="{% url 'catalog:product_detail' product.id %}"
+                               class="btn btn-primary btn-sm">
                                 Подробнее
                             </a>
                         </div>

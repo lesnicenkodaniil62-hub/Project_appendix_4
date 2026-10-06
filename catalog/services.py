@@ -12,24 +12,23 @@ def get_products_by_category(category_id: int) -> list[dict[str, Any]]:
     :param category_id: ID категории
     :return: Список словарей с данными товаров
     """
-    # Критерий: Ключ category_{id}
+    # Ключ category_{id}
     cache_key = f"category_{category_id}"
 
     # 1. Пытаемся получить данные из Redis
     cached_data = cache.get(cache_key)
 
     if cached_data is not None:
-        # Данные найдены в кэше, возвращаем их (cast нужен для mypy)
+        # Данные найдены в кэше, возвращаем их
         return cast(list[dict[str, Any]], cached_data)
 
     # 2. Если в кэше нет, запрашиваем из БД (только опубликованные)
-    # Используем .values() для получения словарей, а не объектов моделей (быстрее и легче для кэша)
-    products_qs = Product.objects.filter(category_id=category_id, is_published=True).values(
-        "id", "name", "description", "price", "image"
-    )
+    products_qs = Product.objects.filter(
+        category_id=category_id,
+        is_published=True,
+    ).values("id", "name", "description", "price", "image")
 
-    # Преобразуем QuerySet в обычный список словарей
-    # Decimal нужно преобразовать в строку для безопасной сериализации в Redis
+    # Преобразуем QuerySet в список словарей
     product_list: list[dict[str, Any]] = []
     for p in products_qs:
         product_list.append(
@@ -42,8 +41,7 @@ def get_products_by_category(category_id: int) -> list[dict[str, Any]]:
             }
         )
 
-    # 3. Сохраняем в Redis с заданным TTL (время хранения)
-    # Критерий: TTL задан (3600 секунд = 1 час)
+    # 3. Сохраняем в Redis с TTL = 1 час
     cache.set(cache_key, product_list, timeout=3600)
 
     return product_list

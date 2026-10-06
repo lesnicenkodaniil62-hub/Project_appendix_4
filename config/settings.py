@@ -125,12 +125,12 @@ LOGOUT_REDIRECT_URL = "users:login"
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # База данных 1 для кэша
+        "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
 }
 
-# Время жизни кэша по умолчанию (в секундах), например, 1 час
+# Время жизни кэша по умолчанию (в секундах)
 CACHE_TTL = 3600
