@@ -1,7 +1,7 @@
 # **Интернет-магазина**
 
 ## Интернет-магазина
-
+Веб-приложение интернет-магазина на Django с кастомной моделью пользователя, системой прав доступа, группами и кэшированием через Redis.
 
 ## Установка
 
@@ -84,7 +84,17 @@ poetry add --group dev ipython
 Более подробные настройки линтеров можно узнать тут, а также тесты, которые прошли функции можно узнать тут же [документации](docs/README.md).
 
 ## Использование:
-
+1. скачать с GitHub
+2. открыть проект и создать файл .env 
+3. создать бзу данных PostgreSQL
+4. настроить файл .env по примеру .env.sample
+    * SECRET_KEY=your-secret-key-here
+    * USER=postgres
+    * PASSWORD=your-password-here
+    * EMAIL_HOST_USER=your-email@gmail.com
+    * EMAIL_HOST_PASSWORD=abcdefghijklmnop
+5. в консоль PyCharm ввести команду ( poetry run python manage.py runserver ) 
+и начните работу работу нажав ссылку в строке (Starting WSGI development server at)
 
 ## Документация:
 
