@@ -12,7 +12,7 @@
             Удобный сервис с широким ассортиментом.
         </p>
         <p>Удобный сервис покупок с доставкой</p>
-        <a class="btn btn-primary btn-lg" href="{% url 'catalog:add_product' %}" role="button">Добавить товар</a>
+        <a class="btn btn-primary btn-lg" href="{% url 'catalog:product_add' %}" role="button">Добавить товар</a>
     </div>
 </div>
 
@@ -115,7 +115,7 @@
 {% else %}
 <div class="alert alert-info" role="alert">
     Товары пока не добавлены.
-    <a href="{% url 'catalog:add_product' %}" class="alert-link">Добавить первый товар</a>
+    <a href="{% url 'catalog:product_add' %}" class="alert-link">Добавить первый товар</a>
 </div>
 {% endif %}
 {% endblock %}

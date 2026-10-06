@@ -2,12 +2,15 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
 from .forms import ProductForm
-from .models import Product
+from .models import Category, Product
+from .services import get_products_by_category
 
 
 class ProductListView(ListView):
@@ -19,9 +22,11 @@ class ProductListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
+        """Возвращаем все товары."""
         return Product.objects.all()
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Добавляем вывод последних 5 товаров в консоль."""
         context = super().get_context_data(**kwargs)
         latest_products = Product.objects.order_by("-created_at")[:5]
         print("\n=== Последние 5 продуктов ===")
@@ -31,8 +36,12 @@ class ProductListView(ListView):
         return context
 
 
+@method_decorator(cache_page(3600), name="dispatch")
 class ProductDetailView(LoginRequiredMixin, DetailView):
-    """Детальная страница товара."""
+    """Детальная страница товара.
+
+    ✅ Задание 2: Кэширование всей страницы на 1 час (3600 сек) через Redis.
+    """
 
     model = Product
     template_name = "catalog/product_detail.html"
@@ -42,7 +51,7 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """Создание товара.
 
-    При создании автоматически заполняется поле owner.
+    ✅ При создании автоматически заполняется поле owner.
     """
 
     model = Product
@@ -56,11 +65,15 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
+        """После создания — редирект на главную."""
         return reverse("catalog:index")
 
 
 class OwnerOrModeratorMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Миксин: доступ только для владельца товара ИЛИ модератора."""
+    """Миксин: доступ только для владельца товара ИЛИ модератора.
+
+    🔒 Используется в ProductUpdateView и ProductDeleteView.
+    """
 
     raise_exception = True
 
@@ -70,9 +83,11 @@ class OwnerOrModeratorMixin(LoginRequiredMixin, UserPassesTestMixin):
         user = self.request  # type: ignore[attr-defined]
         user = user.user
 
+        # Проверка 1: пользователь — владелец товара
         if product.owner_id is not None and product.owner_id == user.pk:
             return True
 
+        # Проверка 2: пользователь — модератор (есть право can_unpublish_product)
         if user.has_perm("catalog.can_unpublish_product"):
             return True
 
@@ -90,6 +105,7 @@ class ProductUpdateView(OwnerOrModeratorMixin, UpdateView):
     template_name = "catalog/product_update.html"
 
     def get_success_url(self) -> str:
+        """После редактирования — редирект на страницу товара."""
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
@@ -104,7 +120,34 @@ class ProductDeleteView(OwnerOrModeratorMixin, DeleteView):
     success_url = "/"
 
     def get_success_url(self) -> str:
+        """После удаления — редирект на главную."""
         return reverse("catalog:index")
+
+
+class CategoryProductListView(TemplateView):
+    """Список товаров в указанной категории.
+
+    ✅ Задание 3: Принимает ID категории, использует сервис с кэшированием в Redis.
+    """
+
+    template_name = "catalog/category_products.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Получаем данные через сервис (с кэшем Redis)."""
+        context = super().get_context_data(**kwargs)
+
+        # Получаем ID категории из URL
+        category_id: int = self.kwargs["category_id"]
+
+        # Получаем категорию для отображения названия в шаблоне
+        category = get_object_or_404(Category, id=category_id)
+        context["category"] = category
+
+        # ✅ View использует сервис, который возвращает данные из Redis/БД
+        products = get_products_by_category(category_id)
+        context["products"] = products
+
+        return context
 
 
 class ContactView(TemplateView):
@@ -113,15 +156,18 @@ class ContactView(TemplateView):
     template_name = "catalog/contacts.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Добавляем переменную success в контекст для GET-запросов."""
         context = super().get_context_data(**kwargs)
         context["success"] = False
         return context
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Обработка POST-запроса."""
         name = request.POST.get("name")
         phone = request.POST.get("phone")
         message = request.POST.get("message")
         print(f"Получено сообщение от {name} ({phone}): {message}")
+
         context = self.get_context_data(**kwargs)
         context["success"] = True
         return render(request, self.template_name, context)
